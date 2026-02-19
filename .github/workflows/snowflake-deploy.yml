@@ -1,20 +1,26 @@
-name: Deploy to Snowflake (Python)
+name: Deploy Snowflake SQL Files
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:            # ← Enables "Run workflow" button
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: false
+        default: 'dev'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
-      - name: Checkout Repository
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Python
+      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -26,12 +32,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4️⃣ Run deployment script
-      - name: Run Snowflake Deployment
+      # 4️⃣ Run SQL files
+      - name: Run all SQL files
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
         run: python deploy_snowflake.py
