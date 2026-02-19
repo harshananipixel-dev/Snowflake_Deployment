@@ -13,12 +13,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install SnowSQL
-        run: |
-          curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.29-linux_x86_64.bash
-          bash snowsql-1.2.29-linux_x86_64.bash
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v1
 
-      - name: Execute SQL Script
+      - name: Run SQL Script
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
@@ -26,9 +24,10 @@ jobs:
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
         run: |
-          snowsql -a $SNOWFLAKE_ACCOUNT \
-                   -u $SNOWFLAKE_USER \
-                   -p $SNOWFLAKE_PASSWORD \
-                   -r $SNOWFLAKE_ROLE \
-                   -w $SNOWFLAKE_WAREHOUSE \
-                   -f sql/setup.sql
+          snow sql \
+            --account $SNOWFLAKE_ACCOUNT \
+            --user $SNOWFLAKE_USER \
+            --password $SNOWFLAKE_PASSWORD \
+            --role $SNOWFLAKE_ROLE \
+            --warehouse $SNOWFLAKE_WAREHOUSE \
+            --file sql/setup.sql
