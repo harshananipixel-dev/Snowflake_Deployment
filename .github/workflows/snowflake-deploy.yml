@@ -29,4 +29,4 @@ jobs:
             --password $SNOWFLAKE_PASSWORD \
             --role $SNOWFLAKE_ROLE \
             --warehouse $SNOWFLAKE_WAREHOUSE \
-            --file sql/setup.sql
+            --filename sql/setup.sql
