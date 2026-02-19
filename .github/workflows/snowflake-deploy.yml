@@ -1,4 +1,4 @@
-name: Deploy to Snowflake
+name: Deploy to Snowflake (Python)
 
 on:
   push:
@@ -10,31 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your repo
+      # 1️⃣ Checkout repo
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Install Snowflake CLI
-      - name: Install Snowflake CLI
-        run: |
-          curl -L -o snowsql.bash https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/latest/linux_x86_64/snowsql-linux_x86_64.bash
-          bash snowsql.bash -y
+      # 2️⃣ Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-      # 3️⃣ Run the SQL script
-      - name: Run Snowflake SQL Script
-        env:
-          SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWSQL_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWSQL_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SNOWSQL_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
         run: |
-          snow sql \
-            --connection default \
-            --filename sql/setup.sql \
-            --account $SNOWSQL_ACCOUNT \
-            --user $SNOWSQL_USER \
-            --role $SNOWSQL_ROLE \
-            --warehouse $SNOWSQL_WAREHOUSE \
-            --password-env SNOWSQL_PASSWORD \
-            --silent
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4️⃣ Run deployment script
+      - name: Run Snowflake Deployment
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+        run: python deploy_snowflake.py
