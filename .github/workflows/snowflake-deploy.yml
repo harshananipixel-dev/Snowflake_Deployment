@@ -4,13 +4,19 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:            # ← Enables "Run workflow" button
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: false
+        default: 'dev'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -34,4 +40,5 @@ jobs:
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
           SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
         run: python deploy_snowflake.py
