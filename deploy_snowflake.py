@@ -1,23 +1,10 @@
-import os
-import snowflake.connector
-
-def get_connection():
-    return snowflake.connector.connect(
-        user=os.environ["SNOWFLAKE_USER"],
-        password=os.environ["SNOWFLAKE_PASSWORD"],
-        account=os.environ["SNOWFLAKE_ACCOUNT"],
-        warehouse=os.environ["SNOWFLAKE_WAREHOUSE"],
-        role=os.environ["SNOWFLAKE_ROLE"],
-    )
-
-def execute_sql(cursor, sql):
-    print(f"Executing: {sql.strip().splitlines()[0]}...")
-    cursor.execute(sql)
-
 def main():
     conn = get_connection()
     cursor = conn.cursor()
     try:
+        # Explicitly set the warehouse first
+        execute_sql(cursor, f"USE WAREHOUSE {os.environ['SNOWFLAKE_WAREHOUSE']}")
+
         # Create database and schema
         execute_sql(cursor, "CREATE DATABASE IF NOT EXISTS company")
         execute_sql(cursor, "USE DATABASE company")
@@ -60,6 +47,3 @@ def main():
     finally:
         cursor.close()
         conn.close()
-
-if __name__ == "__main__":
-    main()
